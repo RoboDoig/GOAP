@@ -1,0 +1,10 @@
+
+.idea/goap.iml
+
+.idea/misc.xml
+
+*.pyc
+
+venv/
+
+.idea/
