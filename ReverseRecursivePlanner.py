@@ -17,9 +17,9 @@ class GoapPlanner:
 
         leaves = list()
 
-        start = self.Node(None, 0, self.world_state, None)
+        start = self.Node(None, 0, self.goal_state, None)
 
-        success = self.build_graph(start, leaves, usable_actions, self.goal_state)
+        success = self.build_graph(start, leaves, usable_actions, self.world_state)
 
         # if no plan found
         if not success:
@@ -48,35 +48,41 @@ class GoapPlanner:
         for task in result:
             print(task.name)
 
-    def build_graph(self, parent, leaves, usable_actions, goal_state):
+    def build_graph(self, parent, leaves, usable_actions, world_state):
         self.count += 1
 
         found_solution = False
 
         for action in usable_actions:
-            # if the parent state has effects matching this state's preconditions, we can use it here
-            # - compress to function
-            neighbor = True
-            for precondition in action.preconditions.keys():
-                if parent.state[precondition] < action.preconditions[precondition]:
-                    neighbor = False
+            # an action is a neighbor if any of its effects would positively contribute to state parameter of the parent
+            neighbor = False
+            for effect in action.effects.keys():
+                if effect in parent.state.keys() and action.effects[effect] > 0:
+                    neighbor = True
+                    break
 
-            # if neighbor, create new node with parent state + this action's effects
+            # if neighbor, create new node with parent state - subtract this action's effects, and add its preconditions
             # TODO-running cost should reflect distance from goal
             if neighbor:
                 node = self.Node(parent, parent.running_cost+action.cost, {}, action)
-                # node.running_cost += self.node_distance_from_state(node, goal_state)
+                # copy parent state
                 for state_param in parent.state:
                     node.state[state_param] = parent.state[state_param]
 
-                    if state_param in action.effects.keys():
-                        node.state[state_param] += action.effects[state_param]
+                # subtract the action's effects
+                for effect in action.effects.keys():
+                    if effect not in node.state.keys():
+                        node.state[effect] = 0
+                    node.state[effect] -= action.effects[effect]
 
-                    if state_param in action.preconditions.keys():
-                        node.state[state_param] -= action.preconditions[state_param]
+                # add the action's preconditions
+                for precondition in action.preconditions.keys():
+                    if precondition not in node.state.keys():
+                        node.state[precondition] = 0
+                    node.state[precondition] += action.preconditions[precondition]
 
                 # did we reach the goal?
-                if self.node_satisfies_state(node, goal_state):
+                if self.node_satisfies_state(node, world_state):
                     leaves.append(node)
                     found_solution = True
                 else:
@@ -85,15 +91,16 @@ class GoapPlanner:
                     for sub_action in usable_actions:
                         if sub_action is not action:
                             action_subset.append(sub_action)
-                    found = self.build_graph(node, leaves, action_subset, goal_state)
+                    found = self.build_graph(node, leaves, action_subset, world_state)
                     if found:
                         found_solution = True
 
         return found_solution
 
     def node_satisfies_state(self, node, state):
-        for param in state:
-            if node.state[param] < state[param]:
+        # we satisfy the state if every node state parameter is less than or equal to the value for the defined state
+        for param in node.state:
+            if node.state[param] > state[param]:
                 return False
         return True
 

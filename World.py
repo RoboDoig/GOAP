@@ -8,6 +8,9 @@ world_actions = [
     Action("PickUpGold", {}, {'gold': 1}, False, cost=10),
     Action("PickUpGold", {}, {'gold': 1}, False, cost=2),
     Action("PickUpStone", {}, {'stone': 1}, False),
+    Action("PickUpStone", {}, {'stone': 1}, False),
+    Action("PickUpStone", {}, {'stone': 1}, False),
+    Action("PickUpStone", {}, {'stone': 1}, False),
     Action("PickUpStone", {}, {'stone': 1}, False)
 ]
 

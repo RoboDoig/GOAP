@@ -1,6 +1,6 @@
 import Action as Action
 import World as World
-import RecursivePlanner as Planner
+import ReverseRecursivePlanner as Planner
 
 planner = Planner.GoapPlanner("planner", World.world_actions, World.state, World.goal)
 
