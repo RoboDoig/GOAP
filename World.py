@@ -7,11 +7,9 @@ world_actions = [
     Action("PickUpWood", {}, {'wood': 1}, False),
     Action("PickUpGold", {}, {'gold': 1}, False, cost=10),
     Action("PickUpGold", {}, {'gold': 1}, False, cost=2),
+    Action("PickUpGold", {}, {'gold': 1}, False, cost=2),
+    Action("PickUpGold", {}, {'gold': 1}, False, cost=2),
     Action("PickUpStone", {}, {'stone': 1}, False),
-    Action("PickUpStone", {}, {'stone': 1}, False),
-    Action("PickUpStone", {}, {'stone': 1}, False),
-    Action("PickUpStone", {}, {'stone': 1}, False),
-    Action("PickUpStone", {}, {'stone': 1}, False)
 ]
 
 state = {
@@ -23,5 +21,6 @@ state = {
 
 goal = {
     'gold': 2,
-    'wood': 1
+    'wood': 1,
+    'stone': 1,
 }
