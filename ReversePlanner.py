@@ -1,4 +1,4 @@
-from copy import deepcopy
+from copy import  deepcopy
 
 
 class GoapPlanner:
@@ -15,11 +15,10 @@ class GoapPlanner:
         closed_nodes = list()
         action_plan = list()
 
-        world_state_node = self.Node(None, 0, self.world_state, None, self.available_actions)
-        goal_state_node = self.Node(None, 0, self.goal_state, None, list())
+        world_state_node = self.Node(None, 0, self.world_state, None, list())
+        goal_state_node = self.Node(None, 0, self.goal_state, None, self.available_actions)
 
-        open_nodes.append(world_state_node)
-        current_cost = 10000 # placeholder, should technically be some representation of Inf
+        open_nodes.append(goal_state_node)
 
         iterations = 0
         while plan_found is False and len(open_nodes) > 0:
@@ -32,8 +31,8 @@ class GoapPlanner:
             plan_found = self.end_state_reached(current_node)
 
             if plan_found:
-                print('plan found')
-                print('iterations: ', iterations)
+                print("plan found!")
+                print("iterations: '", iterations)
                 while current_node.parent is not None:
                     print(current_node.action.name)
                     current_node = current_node.parent
@@ -50,28 +49,24 @@ class GoapPlanner:
                                           deepcopy(current_node.state), neighbor, current_node.available_actions)
                 neighbor_node.available_actions.remove(neighbor)
 
-                # update node with action effects (add effects to state)
+                # update node with action effects
                 for effect in neighbor.effects.keys():
                     if effect not in neighbor_node.state.keys():
                         neighbor_node.state[effect] = 0
-                    neighbor_node.state[effect] += neighbor.effects[effect]
+                    neighbor_node.state[effect] -= neighbor.effects[effect]
 
-                # update node with actions preconditions (subtract preconditions from state)
+                # update node with actions preconditions
                 for precondition in neighbor.preconditions.keys():
                     if precondition not in neighbor_node.state.keys():
                         neighbor_node.state[precondition] = 0
-                    neighbor_node.state[precondition] -= neighbor.preconditions[precondition]
+                    neighbor_node.state[precondition] += neighbor.preconditions[precondition]
 
+                # distance cost
+                d_cost = 0
+                for goal_param in self.world_state:
+                    d_cost += neighbor_node.state[goal_param] - self.goal_state[goal_param]
 
-                # add cost
-                cost = 0
-                for goal_param in self.goal_state:
-                    cost += self.goal_state[goal_param] - neighbor_node.state[goal_param]
-
-                # for world_param in neighbor_node.state:
-                #     cost += neighbor_node.state[world_param] - self.world_state[world_param]
-
-                # neighbor_node.running_cost += cost
+                neighbor_node.running_cost += d_cost
 
                 open_nodes.append(neighbor_node)
 
@@ -83,9 +78,9 @@ class GoapPlanner:
         return lowest_cost
 
     def end_state_reached(self, node):
-        for goal_param in self.goal_state:
-            if goal_param in node.state.keys():
-                if node.state[goal_param] < self.goal_state[goal_param]:
+        for world_param in self.world_state:
+            if world_param in node.state.keys():
+                if node.state[world_param] > self.world_state[world_param]:
                     return False
             else:
                 return False
@@ -100,10 +95,12 @@ class GoapPlanner:
         return neighbors
 
     def is_neighbor(self, action, node):
-        for precondition in action.preconditions.keys():
-            if precondition in node.state.keys():
-                if node.state[precondition] < action.preconditions[precondition]:
+        for effect in action.effects.keys():
+            if effect in node.state.keys():
+                if node.state[effect] < action.effects[effect]:
                     return False
+                else:
+                    return True
             else:
                 return False
         return True
