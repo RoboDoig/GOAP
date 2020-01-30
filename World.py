@@ -24,7 +24,7 @@ world_actions = [
 ]
 
 state = {
-    'gold': 0,
+    'gold': 2,
     'wood': 0,
     'stone': 0,
     'axe': 0,
@@ -32,9 +32,7 @@ state = {
 }
 
 goal = {
-    'gold': 3,
-    'wood': 0,
-    'stone': 0,
-    'axe': 0,
-    'house': 1
+    'gold': 2,
+    'house': 1,
+    'stone': 1
 }

@@ -61,6 +61,8 @@ class GoapPlanner:
                         neighbor_node.state[precondition] = 0
                     neighbor_node.state[precondition] += neighbor.preconditions[precondition]
 
+                # print(neighbor_node.action.name, neighbor_node.state)
+
                 # distance cost
                 d_cost = 0
                 for goal_param in self.world_state:
@@ -78,9 +80,9 @@ class GoapPlanner:
         return lowest_cost
 
     def end_state_reached(self, node):
-        for world_param in self.world_state:
-            if world_param in node.state.keys():
-                if node.state[world_param] > self.world_state[world_param]:
+        for state_param in node.state:
+            if state_param in self.world_state.keys():
+                if node.state[state_param] > self.world_state[state_param]:
                     return False
             else:
                 return False
